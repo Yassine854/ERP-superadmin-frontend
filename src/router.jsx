@@ -4,7 +4,14 @@ import Profile from './pages/Profile';
 import Client from './pages/client';
 import Admin from './pages/admin';
 import Dashboard from './pages/dashboard';
+import Role from './pages/role';
+import Admin_Sliders from './pages/slider/admin';
+import Slide from './pages/slider/slide';
+import Pack from './pages/pack';
+import Offre from './pages/offre';
 
+import Admin_Parametres from './pages/parametre/admin';
+import Parametre from './pages/parametre/parametre';
 
 import Register from './pages/Register';
 import ProtectedLayout from './components/ProtectedLayout';
@@ -44,6 +51,34 @@ const router = createBrowserRouter([
             {
 				path: '/admins',
 				element: <Admin />,
+			},
+            {
+				path: '/roles',
+				element: <Role />,
+			},
+            {
+				path: '/sliders/admins',
+				element: <Admin_Sliders />,
+			},
+            {
+				path: '/sliders/:id',
+				element: <Slide />,
+			},
+            {
+				path: '/packs',
+				element: <Pack />,
+			},
+            {
+				path: '/offres',
+				element: <Offre />,
+			},
+            {
+				path: '/parametres/admins',
+				element: <Admin_Parametres />,
+			},
+            {
+				path: '/parametres/:id',
+				element: <Parametre />,
 			},
 		],
 	},

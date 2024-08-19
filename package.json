@@ -10,9 +10,15 @@
 		"start": "react-scripts start"
 	},
 	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^6.6.0",
+		"@fortawesome/free-brands-svg-icons": "^6.6.0",
+		"@fortawesome/free-regular-svg-icons": "^6.6.0",
+		"@fortawesome/free-solid-svg-icons": "^6.6.0",
+		"@fortawesome/react-fontawesome": "^0.2.2",
 		"axios": "^1.7.2",
 		"flowbite": "^1.6.3",
 		"flowbite-react": "^0.3.8",
+		"font-awesome": "^4.7.0",
 		"jquery": "^3.7.1",
 		"react": "^18.2.0",
 		"react-data-table-component": "^7.6.2",
