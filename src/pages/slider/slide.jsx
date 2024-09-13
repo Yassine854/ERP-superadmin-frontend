@@ -3,9 +3,9 @@ import DataTable from 'react-data-table-component';
 import Modal from '../../components/CreateModal'; // Assurez-vous que ce composant gère les soumissions de formulaire
 import axios from '../../axios';
 import Swal from 'sweetalert2';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 const SliderAdmin = () => {
     const { id } = useParams();
@@ -19,6 +19,7 @@ const SliderAdmin = () => {
     const [descriptionError, setDescriptionError] = useState('');
     const [selectedSlider, setSelectedSlider] = useState(null);
     const [alertMessage, setAlertMessage] = useState('');
+    const navigate = useNavigate(); // Added useNavigate for navigation
 
 
     const capitalizeFirstLetter = (string) => {
@@ -239,23 +240,29 @@ const SliderAdmin = () => {
                 </div>
             </Modal>
 
-            <div className="px-4 sm:px-6 lg:px-8">
-                <div className="sm:flex sm:items-center">
-                    <div className="sm:flex-auto">
-                        <h1 className="text-xl font-semibold text-gray-900">
-                            Les Slides de {capitalizeFirstLetter(admin)}
-                        </h1>
-                    </div>
-                    <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        >
-                            Ajouter slide
-                        </button>
-                    </div>
+            <div className="text-center md:text-left mb-4 md:mb-0">
+                    <h1 className="text-4xl font-extrabold text-gray-800">Gestion des Slides</h1>
+                    <h2 className="text-2xl font-semibold text-gray-600 mt-2">Admin: <span className="text-gray-800">{capitalizeFirstLetter(admin)}</span></h2>
                 </div>
+            <div className="flex justify-between items-center mt-8 mb-4">
+
+                <button
+                    onClick={() => navigate('/sliders/admins')}
+                    className="flex items-center text-gray-600 hover:text-gray-800 mb-4"
+                >
+                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" /> Retour aux admins
+                </button>
+
+
+
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                    Ajouter Slide
+                </button>
             </div>
+
 
             <div className="mt-8 px-4 sm:px-6 lg:px-8">
                 <DataTable

@@ -24,9 +24,10 @@ export default function Admin() {
     fetchAdmins();
   }, []);
 
-  const handleShowSliders = (adminId) => {
-    navigate(`/parametres/${adminId}`);
+  const handleShowSliders = (row) => {
+    navigate(`/parametres/${row._id}`, { state: { adminName: row.name } });
   };
+
 
   const columns = [
     {
@@ -49,7 +50,7 @@ export default function Admin() {
       cell: (row) => (
         <div className="flex space-x-2">
           <button
-            onClick={() => handleShowSliders(row._id)}
+            onClick={() => handleShowSliders(row)}
             className="text-blue-600 hover:text-blue-800 flex items-center"
           >
             <FontAwesomeIcon icon={faArrowRight} className="mr-2" />

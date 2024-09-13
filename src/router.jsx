@@ -7,8 +7,8 @@ import Dashboard from './pages/dashboard';
 import Role from './pages/role';
 import Admin_Sliders from './pages/slider/admin';
 import Slide from './pages/slider/slide';
-import Pack from './pages/pack';
-import Offre from './pages/offre';
+import Pack from './pages/packs/pack';
+import Offre from './pages/packs/offre';
 
 import Admin_Parametres from './pages/parametre/admin';
 import Parametre from './pages/parametre/parametre';
@@ -26,10 +26,7 @@ const router = createBrowserRouter([
 				path: '/',
 				element: <Login />,
 			},
-			{
-				path: '/register',
-				element: <Register />,
-			},
+			
 		],
 	},
 	{
@@ -66,11 +63,17 @@ const router = createBrowserRouter([
 			},
             {
 				path: '/packs',
-				element: <Pack />,
-			},
-            {
-				path: '/offres',
-				element: <Offre />,
+
+                children: [
+                    {
+                        path: '',
+                        element: <Pack />,
+                    },
+                    {
+                        path: ':packId',
+                        element: <Offre />,
+                    },
+                ]
 			},
             {
 				path: '/parametres/admins',

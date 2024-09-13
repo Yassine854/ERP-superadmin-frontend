@@ -1,28 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
-import Modal from '../../components/LargeModal';
+import Modal from '../../components/CreateModal';
 import axios from '../../axios';
 import Swal from 'sweetalert2';
-import { useParams } from 'react-router-dom';
+import { useParams,useLocation,useNavigate  } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash,faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import NatureModal from './natureModal';
+import {Button, Form } from 'react-bootstrap';
 
 const Parametres = () => {
     const { id } = useParams();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
-        title: '', description: '', key_word: '', temps_travail: '',
+        nature_id: '', description: '', key_word: '', temps_travail: '',
         email: '', url_fb: '', url_insta: '', url_youtube: '',
         url_tiktok: '', url_twiter: '', mode_payement: ''
     });
     const [parametres, setParametres] = useState([]);
     const [pending, setPending] = useState(true);
     const [editMode, setEditMode] = useState(false);
-    const [titleError, setTitleError] = useState('');
     const [descriptionError, setDescriptionError] = useState('');
     const [selectedParametre, setSelectedParametre] = useState(null);
     const [alertMessage, setAlertMessage] = useState('');
-
+    const [natures, setNatures] = useState([]);
+    const [openAddNature, setOpenAddNature] = useState(false);
+    const [newNature, setNewNature] = useState('');
+    const location = useLocation();
+    const { adminName } = location.state || {};
+    const navigate = useNavigate();
     // Fetch parameters from the server
     const fetchParametres = async () => {
         try {
@@ -36,6 +42,15 @@ const Parametres = () => {
 
     // Fetch parameters on component mount and when id changes
     useEffect(() => {
+        const fetchNatures = async () => {
+            try {
+                const response = await axios.get('/natures');
+                setNatures(response.data || []);
+            } catch (error) {
+                console.error('Erreur lors de la récupération des natures:', error);
+            }
+        };
+        fetchNatures();
         fetchParametres();
     }, [id]);
 
@@ -43,7 +58,7 @@ const Parametres = () => {
     useEffect(() => {
         if (!isModalOpen) {
             setFormData({
-                title: '', description: '', key_word: '', temps_travail: '',
+                nature_id: '', description: '', key_word: '', temps_travail: '',
                 email: '', url_fb: '', url_insta: '', url_youtube: '',
                 url_tiktok: '', url_twiter: '', mode_payement: ''
             });
@@ -51,7 +66,7 @@ const Parametres = () => {
             setSelectedParametre(null);
         } else if (editMode && selectedParametre) {
             setFormData({
-                title: selectedParametre.title || '',
+                nature_id: selectedParametre.nature || '',
                 description: selectedParametre.description || '',
                 key_word: selectedParametre.key_word || '',
                 temps_travail: selectedParametre.temps_travail || '',
@@ -65,6 +80,31 @@ const Parametres = () => {
             });
         }
     }, [isModalOpen, editMode, selectedParametre]);
+
+    const handleOpenAddNature = () => {
+        setOpenAddNature(true);
+    };
+
+    const handleCloseAddNature = () => {
+        setNewNature('');
+        setOpenAddNature(false);
+    };
+
+const handleAddNature = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await axios.post('/natures', { name: newNature });
+        if (response.status === 201) {
+            setNatures([...natures, response.data]);
+            setNewNature('');
+            setOpenAddNature(false);
+            setAlertMessage("Nature ajoutée avec succès.");
+            setTimeout(() => setAlertMessage(''), 3000);
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout de la nature:', error);
+    }
+};
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -129,8 +169,7 @@ const Parametres = () => {
 
     const columns = [
     { name: 'ID', selector: row => row._id, sortable: true },
-    { name: 'Titre', selector: row => row.title, sortable: true },
-    { name: 'Temps de Travail', selector: row => row.temps_travail, sortable: true },
+    { name: 'Nature', selector: row => row.nature.name, sortable: true },
     { name: 'Email', selector: row => row.email, sortable: true },
     {
         name: 'Mode de Paiement',
@@ -186,16 +225,57 @@ const Parametres = () => {
                 </div>
             )}
 
+
+<NatureModal
+                isOpen={openAddNature}
+                onClose={handleCloseAddNature}
+                title="Ajouter Nouvelle Nature"
+                onSubmit={handleAddNature}
+                footer={(
+                    <>
+                        <button
+                            type="submit"
+                            className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        >
+                            Ajouter
+                        </button>
+                        <button
+                            type="button"
+                            className="ml-3 bg-gray-100 transition duration-150 ease-in-out text-gray-600 hover:border-gray-400 hover:bg-gray-300 border rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:border-gray-500"
+                            onClick={handleCloseAddNature}
+                        >
+                            Annuler
+                        </button>
+                    </>
+                )}
+            >
+                <div>
+                    <label htmlFor="nature" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        Nature d'entreprise
+                    </label>
+                    <input
+                        type="text"
+                        id="nature"
+                        value={newNature}
+                        onChange={(e) => setNewNature(e.target.value)}
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                        placeholder="Nom de la nature"
+                        required
+                    />
+                </div>
+            </NatureModal>
+
+
+
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => {
                     setIsModalOpen(false);
                     setFormData({
-                        title: '', description: '', key_word: '', temps_travail: '',
+                        nature: '', description: '', key_word: '', temps_travail: '',
                         email: '', url_fb: '', url_insta: '', url_youtube: '',
                         url_tiktok: '', url_twiter: '', mode_payement: ''
                     });
-                    setTitleError('');
                     setDescriptionError('');
                     setEditMode(false);
                     setSelectedParametre(null);
@@ -222,22 +302,28 @@ const Parametres = () => {
                 style={{ width: '80%', maxWidth: '800px' }} // Make the modal larger
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="title" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Titre
-                        </label>
-                        <input
-                            type="text"
-                            name="title"
-                            id="title"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="Titre du paramètre"
-                            value={formData.title}
-                            onChange={handleChange}
-                            required
-                        />
-                        {titleError && <p className="text-sm text-red-600">{titleError}</p>}
-                    </div>
+                <div className="mb-4">
+                    <label htmlFor="nature" className="block text-sm font-medium text-gray-700">Nature d'entreprise</label>
+                    <select
+    id="nature_id"
+    name="nature_id"
+    value={formData.nature_id}
+    onChange={handleChange}
+    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    required
+>
+    <option value="">Sélectionner une nature</option>
+    {natures.map(nature => (
+        <option key={nature._id} value={nature._id}>
+            {nature.name}
+        </option>
+    ))}
+
+</select>
+
+
+                </div>
+
                     <div>
                         <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Description
@@ -249,7 +335,7 @@ const Parametres = () => {
                             placeholder="Description du paramètre"
                             value={formData.description}
                             onChange={handleChange}
-                            required
+
                         />
                         {descriptionError && <p className="text-sm text-red-600">{descriptionError}</p>}
                     </div>
@@ -385,24 +471,41 @@ const Parametres = () => {
 
                 </div>
             </Modal>
-
-            <div className="px-4 sm:px-6 lg:px-8">
-                <div className="sm:flex sm:items-center">
-                    <div className="sm:flex-auto">
-                        <h1 className="text-xl font-semibold text-gray-900">
-                            Les Paramètres
-                        </h1>
-                    </div>
-                    <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        >
-                            Ajouter Paramètre
-                        </button>
-                    </div>
+            <div className="text-center md:text-left mb-4 md:mb-0">
+                    <h1 className="text-4xl font-extrabold text-gray-800">Gestion des Paramétres</h1>
+                    <h2 className="text-2xl font-semibold text-gray-600 mt-2">Admin: <span className="text-gray-800">{adminName}</span></h2>
                 </div>
+            <div className="flex justify-between items-center mt-8 mb-4">
+
+                <button
+                    onClick={() => navigate('/parametres/admins')}
+                    className="flex items-center text-gray-600 hover:text-gray-800 mb-4"
+                >
+                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" /> Retour aux admins
+                </button>
+
+
+
+                <div className="flex flex-col space-y-4">
+    {parametres.length < 1 && (
+    <button
+        onClick={() => setIsModalOpen(true)}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    >
+        Ajouter Paramétre
+    </button>
+)}
+
+    <button
+        onClick={handleOpenAddNature}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    >
+        Ajouter Nature d'entreprise
+    </button>
+</div>
+
             </div>
+
 
             <div className="mt-8 px-4 sm:px-6 lg:px-8">
                 <DataTable

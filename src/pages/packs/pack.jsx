@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
-import Modal from '../components/CreateModal';
-import axios from '../axios';
+import Modal from '../../components/CreateModal';
+import axios from '../../axios';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faBars} from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+
 import Swal from 'sweetalert2';
 
-export default function OffreManager() {
+export default function PackManager() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ title: '', description: '', prix: '' });
     const [errors, setErrors] = useState({});
-    const [offres, setOffres] = useState([]);
+    const [packs, setPacks] = useState([]);
     const [pending, setPending] = useState(true);
-    const [selectedOffre, setSelectedOffre] = useState(null);
+    const [selectedPack, setSelectedPack] = useState(null);
     const [alertMessage, setAlertMessage] = useState('');
+    const navigate = useNavigate();
 
-    useEffect(() => { fetchOffres(); }, []);
 
-    const fetchOffres = async () => {
+    useEffect(() => { fetchPacks(); }, []);
+
+    const fetchPacks = async () => {
         try {
-            const response = await axios.get('/offres');
-            setOffres(response.data);
+            const response = await axios.get('/packs');
+            setPacks(response.data);
         } catch (error) {
-            console.error('Error fetching offres:', error);
+            console.error('Error fetching packs:', error);
         } finally {
             setPending(false);
         }
@@ -32,14 +36,18 @@ export default function OffreManager() {
     const resetForm = () => {
         setFormData({ title: '', description: '', prix: '' });
         setErrors({});
-        setSelectedOffre(null);
+        setSelectedPack(null);
     };
 
-    const handleModalOpen = (offre = null) => {
-        setIsEditing(!!offre);
-        setSelectedOffre(offre);
-        setFormData(offre || { title: '', description: '', prix: '' });
+    const handleModalOpen = (pack = null) => {
+        setIsEditing(!!pack);
+        setSelectedPack(pack);
+        setFormData(pack || { title: '', description: '', prix: '' });
         setIsModalOpen(true);
+    };
+
+    const handleOffresOpen = (pack = null) => {
+        navigate(`/packs/${pack._id}`, { state: { packName: pack.title } });
     };
 
     const handleModalClose = () => {
@@ -51,22 +59,22 @@ export default function OffreManager() {
         e.preventDefault();
         try {
             const resp = isEditing
-                ? await axios.put(`/offres/update/${selectedOffre._id}`, formData)
-                : await axios.post('/offres/create', formData);
+                ? await axios.put(`/packs/update/${selectedPack._id}`, formData)
+                : await axios.post('/packs/create', formData);
 
             if (resp.status === 200 || resp.status === 201) {
-                setAlertMessage(isEditing ? "Offre mis à jour avec succès." : "Offre créée avec succès.");
+                setAlertMessage(isEditing ? "Pack modifié avec succès." : "Pack créée avec succès.");
                 setTimeout(() => {
                     setAlertMessage('');
                 }, 3000);
-                fetchOffres();
+                fetchPacks();
                 handleModalClose();
             }
         } catch (error) {
             if (error.response && error.response.status === 422) {
                 setErrors(error.response.data.errors);
             } else {
-                console.error('Error saving offre:', error);
+                console.error('Error saving pack:', error);
             }
         }
     };
@@ -83,14 +91,14 @@ export default function OffreManager() {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.delete(`/offres/destroy/${_id}`);
-                    setAlertMessage("Offre supprimé avec succès.");
+                    await axios.delete(`/packs/destroy/${_id}`);
+                    setAlertMessage("Pack supprimé avec succès.");
                     setTimeout(() => {
                         setAlertMessage('');
                     }, 3000);
-                    fetchOffres();
+                    fetchPacks();
                 } catch (error) {
-                    console.error('Error deleting offre:', error);
+                    console.error('Error deleting pack:', error);
                 }
             }
         });
@@ -99,12 +107,14 @@ export default function OffreManager() {
     const columns = [
         { name: 'ID', selector: (row) => row._id, sortable: true },
         { name: 'Titre', selector: (row) => row.title, sortable: true },
-        { name: 'Description', selector: (row) => row.description, sortable: true },
         { name: 'Prix', selector: (row) => row.prix, sortable: true },
         {
             name: 'Actions',
             cell: (row) => (
                 <div className="flex items-center space-x-4">
+                    <button onClick={() => handleOffresOpen(row)} className="text-blue-600 hover:text-blue-800 flex items-center">
+                        <FontAwesomeIcon icon={faBars} className="mr-2" /> Offres
+                    </button>
                     <button onClick={() => handleModalOpen(row)} className="text-blue-600 hover:text-blue-800 flex items-center">
                         <FontAwesomeIcon icon={faEdit} className="mr-2" /> Modifier
                     </button>
@@ -127,7 +137,7 @@ export default function OffreManager() {
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleModalClose}
-                title={isEditing ? "Modifier Offre" : "Ajouter Offre"}
+                title={isEditing ? "Modifier Pack" : "Ajouter Pack"}
                 onSubmit={handleSubmit}
                 footer={
                     <>
@@ -154,7 +164,7 @@ export default function OffreManager() {
                         name="title"
                         id="title"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
-                        placeholder="Titre du offre"
+                        placeholder="Titre du pack"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
@@ -167,7 +177,7 @@ export default function OffreManager() {
                         name="description"
                         id="description"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
-                        placeholder="Description du offre"
+                        placeholder="Description du pack"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         required
@@ -180,7 +190,7 @@ export default function OffreManager() {
                         name="prix"
                         id="prix"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
-                        placeholder="Prix du offre"
+                        placeholder="Prix du pack"
                         value={formData.prix}
                         onChange={(e) => setFormData({ ...formData, prix: e.target.value })}
                         required
@@ -190,17 +200,17 @@ export default function OffreManager() {
             </Modal>
 
             <div className="flex justify-between items-center mt-8 mb-4">
-                <h1 className="text-3xl font-bold">Gestion des Offres</h1>
+                <h1 className="text-3xl font-bold">Gestion des Packs</h1>
                 <button
                     onClick={() => handleModalOpen()}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
-                    Ajouter Offre
+                    Ajouter Pack
                 </button>
             </div>
             <DataTable
                 columns={columns}
-                data={offres}
+                data={packs}
                 pagination
                 highlightOnHover
                 progressPending={pending}

@@ -10,15 +10,22 @@ import { faEdit, faTrash,faLock,faLockOpen } from '@fortawesome/free-solid-svg-i
 export default function Admin() {
     const { admin, setAdmin } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', cpassword: '' });
-    const [nameError, setNameError] = useState('');
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', cpassword: '', tel: '', city: '', address: '', zip: '' });
+    const [telError, setTelError] = useState('');
+    const [cityError, setCityError] = useState('');
+    const [addressError, setAddressError] = useState('');
+    const [zipError, setZipError] = useState('');    const [nameError, setNameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [admins, setAdmins] = useState([]); // State to store admins
     const [pending, setPending] = useState(true);
     const [editMode, setEditMode] = useState(false);
     const [alertMessage, setAlertMessage] = useState(''); // State to store alert message
-
+    const tunisianCities = [
+        'Tunis', 'Ariana', 'Ben Arous', 'Manouba', 'Nabeul', 'Sousse', 'Monastir', 'Mahdia', 'Kairouan', 'Sfax',
+        'Gabès', 'Mednine', 'Tataouine', 'Kasserine', 'Jendouba', 'Siliana', 'Zaghouan', 'Bizerte', 'Beja', 'Kebili',
+        'Gafsa', 'Sidi Bouzid', 'Médénine', 'Tozeur', 'Kef'
+      ];
     const [selectedAdmin, setSelectedAdmin] = useState(null);
 
     const fetchAdmins = async () => {
@@ -39,10 +46,14 @@ export default function Admin() {
     useEffect(() => {
         // Reset form data and errors when modal opens or closes
         if (!isModalOpen) {
-            setFormData({ name: '', email: '', password: '', cpassword: '' });
+            setFormData({ name: '', email: '', password: '', cpassword: '', tel: '', city: '', address: '', zip: '' });
             setNameError('');
             setEmailError('');
             setPasswordError('');
+            setTelError('');
+            setCityError('');
+            setAddressError('');
+            setZipError('');
             setEditMode(false);
             setSelectedAdmin(null);
         } else if (editMode && selectedAdmin) {
@@ -52,40 +63,48 @@ export default function Admin() {
                 email: selectedAdmin.email,
                 password: '',
                 cpassword: '',
+                tel: selectedAdmin.tel || '',
+                city: selectedAdmin.city || '',
+                address: selectedAdmin.address || '',
+                zip: selectedAdmin.zip || '',
             });
+
         }
     }, [isModalOpen]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const { name, email, password, cpassword } = formData;
+        const { name, email, password, cpassword, tel, city, address, zip } = formData;
         const body = {
             name,
             email,
             password,
             password_confirmation: cpassword,
+            tel,
+            city,
+            address,
+            zip,
         };
         try {
             if (editMode && selectedAdmin) {
                 // Update existing admin
-                const resp = await axios.put(`/admins/update/${selectedAdmin._id}`, body);
+                const resp = await axios.post(`/admins/update/${selectedAdmin._id}`, body);
                 if (resp.status === 200) {
-                  fetchAdmins();
-                  setAlertMessage("Admin mis à jour avec succès.");
-                  setTimeout(() => {
-                    setAlertMessage('');
-                }, 3000);
-
+                    fetchAdmins();
+                    setFormData({ name: '', email: '', password: '', cpassword: '', tel: '', city: '', address: '', zip: '' });                    setAlertMessage("Admin mis à jour avec succès.");
+                    setTimeout(() => {
+                        setAlertMessage('');
+                    }, 3000);
                 }
             } else {
                 // Create new admin
-                const resp = await axios.post('/CreateUser', { ...body, role: '1' });
+                const resp = await axios.post('/admins/create', { ...body, role: '1' });
                 if (resp.status === 200) {
                     fetchAdmins();
-                  setAlertMessage("Admin crée avec succès.");
-                  setTimeout(() => {
-                    setAlertMessage('');
-                }, 3000);
+                    setAlertMessage("Admin créé avec succès.");
+                    setFormData({ name: '', email: '', password: '', cpassword: '', tel: '', city: '', address: '', zip: '' });                    setTimeout(() => {
+                        setAlertMessage('');
+                    }, 3000);
                 }
             }
             setIsModalOpen(false); // Close modal after successful submission
@@ -94,10 +113,15 @@ export default function Admin() {
                 const errors = error.response.data.errors;
                 setNameError(errors.name ? errors.name[0] : '');
                 setEmailError(errors.email ? errors.email[0] : '');
+                setTelError(errors.tel ? errors.tel[0] : '');
+                setCityError(errors.city ? errors.city[0] : '');
+                setAddressError(errors.address ? errors.address[0] : '');
+                setZipError(errors.zip ? errors.zip[0] : '');
                 setPasswordError(errors.password ? errors.password[0] : '');
             }
         }
     };
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -320,6 +344,71 @@ export default function Admin() {
                     />
                     {emailError && <p className="text-sm text-red-600">{emailError}</p>}
                 </div>
+                <div>
+    <label htmlFor="tel" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        Téléphone
+    </label>
+    <input
+        type="text"
+        name="tel"
+        id="tel"
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+        placeholder="12345678"
+        value={formData.tel}
+        onChange={handleChange}
+        required
+    />
+    {telError && <p className="text-sm text-red-600">{telError}</p>}
+</div>
+<div className="mb-4">
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700">Ville</label>
+                    <select
+                        id="city"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                        <option value="">Sélectionner une ville</option>
+                        {tunisianCities.map((city, index) => (
+                            <option key={index} value={city}>{city}</option>
+                        ))}
+                    </select>
+                    {cityError && <p className="text-red-500 text-xs mt-1">{cityError}</p>}
+                </div>
+<div>
+    <label htmlFor="address" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        Adresse
+    </label>
+    <input
+        type="text"
+        name="address"
+        id="address"
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+        placeholder="123 Rue Exemple"
+        value={formData.address}
+        onChange={handleChange}
+        required
+    />
+    {addressError && <p className="text-sm text-red-600">{addressError}</p>}
+</div>
+<div>
+    <label htmlFor="zip" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        Code Postal
+    </label>
+    <input
+        type="text"
+        name="zip"
+        id="zip"
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+        placeholder="75001"
+        value={formData.zip}
+        onChange={handleChange}
+        required
+    />
+    {zipError && <p className="text-sm text-red-600">{zipError}</p>}
+</div>
+
                 <div>
                     <label
                         htmlFor="password"

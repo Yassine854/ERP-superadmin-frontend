@@ -12,25 +12,25 @@ export default function DefaultLayout() {
         settings: false,
     });
 
-    // useEffect(() => {
-    //     (async () => {
-    //         try {
-    //             const resp = await axios.get('/user');
-    //             if (resp.status === 200) {
-    //                 setUser(resp.data.data);
-    //             }
-    //         } catch (error) {
-    //             if (error.response.status === 401) {
-    //                 localStorage.removeItem('user');
-    //                 window.location.href = '/';
-    //             }
-    //         }
-    //     })();
-    // }, [setUser]);
+    useEffect(() => {
+        (async () => {
+            try {
+                const resp = await axios.get('/user');
+                if (resp.status === 200) {
+                    setUser(resp.data.data);
+                }
+            } catch (error) {
+                if (error.response.status === 401) {
+                    localStorage.removeItem('user');
+                    window.location.href = '/';
+                }
+            }
+        })();
+    }, []);
 
-    // if (!user) {
-    //     return <Navigate to="/" />;
-    // }
+    if (!user) {
+        return <Navigate to="/" />;
+    }
 
     const handleLogout = async () => {
         try {
@@ -49,31 +49,34 @@ export default function DefaultLayout() {
     };
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-200">
             {/* Sidebar */}
-            <nav className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-blue-800 to-blue-600 text-white shadow-xl z-50 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0`}>
+            <nav className={`fixed top-0 left-0 h-full w-64 bg-gray-800 text-gray-200 shadow-md z-50 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0`}>
                 <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between p-4 bg-blue-900">
-                        <a href="#" className="flex items-center">
-                            <img src="https://dcodemania.com/img/logo.svg" className="h-8 mr-3" alt="DCodeMania Logo" />
-                            <span className="text-2xl font-bold">Super Admin</span>
-                        </a>
-                        <button className="md:hidden text-white" onClick={() => setSidebarOpen(false)}>
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div className="flex items-center justify-between p-4 bg-gray-700">
+                        <a href="#" className="text-xl font-semibold">Super Admin</a>
+                        <button className="md:hidden" onClick={() => setSidebarOpen(false)}>
+                            <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
                     <ul className="mt-4 flex-1 px-2 space-y-2">
                         <li>
-                            <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-200 hover:bg-blue-700 hover:shadow-lg rounded-lg'}>
+                            <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'block py-3 px-4 bg-gray-700 rounded-lg' : 'block py-3 px-4 hover:bg-gray-700 rounded-lg'}>
                                 Dashboard
                             </NavLink>
                         </li>
 
                         <li>
-                            <NavLink to="/profile" className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-200 hover:bg-blue-700 hover:shadow-lg rounded-lg'}>
-                                Profil
+                            <NavLink to="/profile" className={({ isActive }) => isActive ? 'block py-3 px-4 bg-gray-700 rounded-lg' : 'block py-3 px-4 hover:bg-gray-700 rounded-lg'}>
+                                Profile
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/packs" className={({ isActive }) => isActive ? 'block py-3 px-4 bg-gray-700 rounded-lg' : 'block py-3 px-4 hover:bg-gray-700 rounded-lg'}>
+                                Packs et Offres
                             </NavLink>
                         </li>
 
@@ -81,9 +84,9 @@ export default function DefaultLayout() {
                             <div className="relative">
                                 <button
                                     onClick={() => toggleDropdown('users')}
-                                    className="flex justify-between items-center w-full text-left py-3 px-4 text-gray-800 bg-blue-500 hover:bg-blue-600 hover:shadow-lg rounded-lg transition-colors duration-300"
+                                    className="flex justify-between items-center w-full text-left py-3 px-4 bg-gray-600 hover:bg-gray-700 rounded-lg"
                                 >
-                                    Utilisateurs
+                                    Admins d'entreprise
                                     <svg
                                         className={`w-4 h-4 ml-2 transition-transform duration-300 ${dropdowns.users ? 'rotate-180' : ''}`}
                                         fill="none"
@@ -95,19 +98,19 @@ export default function DefaultLayout() {
                                     </svg>
                                 </button>
                                 {dropdowns.users && (
-                                    <ul className="absolute left-0 w-full bg-white text-gray-800 rounded-lg shadow-lg z-10 mt-1">
+                                    <ul className="absolute left-0 w-full bg-gray-700 text-gray-200 rounded-lg shadow-lg z-10 mt-1">
                                         <li>
                                             <NavLink
                                                 to="/admins"
-                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 text-white rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-800 hover:bg-blue-100 hover:shadow-md rounded-lg transition-colors duration-300'}
+                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-gray-800 text-gray-200 rounded-lg' : 'block py-3 px-4 hover:bg-gray-800 rounded-lg'}
                                             >
-                                                Admins Entreprises
+                                                Admins
                                             </NavLink>
                                         </li>
                                         <li>
                                             <NavLink
                                                 to="/roles"
-                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 text-white rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-800 hover:bg-blue-100 hover:shadow-md rounded-lg transition-colors duration-300'}
+                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-gray-800 text-gray-200 rounded-lg' : 'block py-3 px-4 hover:bg-gray-800 rounded-lg'}
                                             >
                                                 Roles
                                             </NavLink>
@@ -120,50 +123,10 @@ export default function DefaultLayout() {
                         <li>
                             <div className="relative">
                                 <button
-                                    onClick={() => toggleDropdown('offers')}
-                                    className="flex justify-between items-center w-full text-left py-3 px-4 text-gray-800 bg-blue-500 hover:bg-blue-600 hover:shadow-lg rounded-lg transition-colors duration-300"
-                                >
-                                    Offres et Packs
-                                    <svg
-                                        className={`w-4 h-4 ml-2 transition-transform duration-300 ${dropdowns.offers ? 'rotate-180' : ''}`}
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </button>
-                                {dropdowns.offers && (
-                                    <ul className="absolute left-0 w-full bg-white text-gray-800 rounded-lg shadow-lg z-10 mt-1">
-                                        <li>
-                                            <NavLink
-                                                to="/packs"
-                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 text-white rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-800 hover:bg-blue-100 hover:shadow-md rounded-lg transition-colors duration-300'}
-                                            >
-                                                Packs
-                                            </NavLink>
-                                        </li>
-                                        <li>
-                                            <NavLink
-                                                to="/offres"
-                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 text-white rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-800 hover:bg-blue-100 hover:shadow-md rounded-lg transition-colors duration-300'}
-                                            >
-                                                Offres
-                                            </NavLink>
-                                        </li>
-                                    </ul>
-                                )}
-                            </div>
-                        </li>
-
-                        <li>
-                            <div className="relative">
-                                <button
                                     onClick={() => toggleDropdown('settings')}
-                                    className="flex justify-between items-center w-full text-left py-3 px-4 text-gray-800 bg-blue-500 hover:bg-blue-600 hover:shadow-lg rounded-lg transition-colors duration-300"
+                                    className="flex justify-between items-center w-full text-left py-3 px-4 bg-gray-600 hover:bg-gray-700 rounded-lg"
                                 >
-                                    Paramétrage Site
+                                    Site Settings
                                     <svg
                                         className={`w-4 h-4 ml-2 transition-transform duration-300 ${dropdowns.settings ? 'rotate-180' : ''}`}
                                         fill="none"
@@ -175,11 +138,11 @@ export default function DefaultLayout() {
                                     </svg>
                                 </button>
                                 {dropdowns.settings && (
-                                    <ul className="absolute left-0 w-full bg-white text-gray-800 rounded-lg shadow-lg z-10 mt-1">
+                                    <ul className="absolute left-0 w-full bg-gray-700 text-gray-200 rounded-lg shadow-lg z-10 mt-1">
                                         <li>
                                             <NavLink
                                                 to="/sliders/admins"
-                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 text-white rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-800 hover:bg-blue-100 hover:shadow-md rounded-lg transition-colors duration-300'}
+                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-gray-800 text-gray-200 rounded-lg' : 'block py-3 px-4 hover:bg-gray-800 rounded-lg'}
                                             >
                                                 Slides
                                             </NavLink>
@@ -187,9 +150,9 @@ export default function DefaultLayout() {
                                         <li>
                                             <NavLink
                                                 to="/parametres/admins"
-                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-blue-700 text-white rounded-lg shadow-lg' : 'block py-3 px-4 text-gray-800 hover:bg-blue-100 hover:shadow-md rounded-lg transition-colors duration-300'}
+                                                className={({ isActive }) => isActive ? 'block py-3 px-4 bg-gray-800 text-gray-200 rounded-lg' : 'block py-3 px-4 hover:bg-gray-800 rounded-lg'}
                                             >
-                                                Paramètres
+                                                Parameters
                                             </NavLink>
                                         </li>
                                     </ul>
@@ -198,8 +161,8 @@ export default function DefaultLayout() {
                         </li>
                     </ul>
                     <div className="p-4">
-                        <a href="#" onClick={handleLogout} rel="noopener noreferrer" className="block py-3 px-4 text-center text-blue-900 bg-white rounded-lg shadow-lg hover:bg-gray-100">
-                            <span className="font-bold">Logout</span>
+                        <a href="#" onClick={handleLogout} className="block py-3 px-4 text-center text-gray-800 bg-gray-300 rounded-lg hover:bg-gray-400">
+                            <span className="font-bold">Déconnexion</span>
                         </a>
                     </div>
                 </div>

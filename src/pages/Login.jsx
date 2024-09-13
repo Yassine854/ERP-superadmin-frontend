@@ -18,9 +18,16 @@ export default function Login() {
 		await csrfToken();
 		try {
 			const resp = await axios.post('/login', body);
+
 			if (resp.status === 200) {
-				setUser(resp.data.user);
+                if(resp.data.user.role!=0){
+                    setError('Non Autorisé');
+                }
+                else{
+                setUser(resp.data.user);
 				return <Navigate to="/dashboard" />;
+                }
+
 			}
 		} catch (error) {
 			if (error.response.status === 401) {
@@ -35,11 +42,6 @@ export default function Login() {
 				<a
 					href="#"
 					className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-					<img
-						className="w-8 h-8 mr-2"
-						src="https://dcodemania.com/img/logo.svg"
-						alt="logo"
-					/>
 					Super Admin
 				</a>
 				<div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
